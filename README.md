@@ -1,3 +1,11 @@
+Work in Progress.
+
+This should become a network client (someday) which can do DHCP negotiation & http requests.
+
+`Oct 25 2016` - It does DHCP negotiation . `dhcping` linux utility is used alongside the C code. Its sub-optimal but works. 
+
+Forked from [dhcp-client](https://github.com/samueldotj/dhcp-client). Original README below 
+
 dhcp-client
 ===========
 
