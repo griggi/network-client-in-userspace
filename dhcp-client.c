@@ -96,7 +96,7 @@ do{                                                                     \
 
 #define DHCP_MAGIC_COOKIE   0x63825363
 
-verbose_level_t program_verbose_level = VERBOSE_LEVEL_DEBUG;
+verbose_level_t program_verbose_level = VERBOSE_LEVEL_INFO;
 pcap_t *pcap_handle;
 u_int32_t ip;
 
@@ -395,39 +395,51 @@ main(int argc, char *argv[])
     int result;
     char errbuf[PCAP_ERRBUF_SIZE];
     char *dev;
-    u_int8_t mac[6];
+    time_t t;
+    srand((unsigned) time(&t));
+
+    u_int8_t mac[6];// = {0x2,0x1,0,0,0,1};
+    //u_int8_t mac[6] = {0x8,0x0,0x27,0x1e,0x7,0xbf};
+    int i;
+    mac[0] = 0x2;
+    for (i = 1; i < 6; i ++)
+    {
+      mac[i] = rand() % 256;
+    }
+
 
     if (argc < 2 || (strcmp(argv[1], "-h") == 0))
     {
-        printf("Usage: %s <interface>\n", argv[0]);
-        return 0;
+      printf("Usage: %s <interface>\n", argv[0]);
+      return 0;
     }
     dev = argv[1];
 
     /* Get the MAC address of the interface */
-    result = get_mac_address(dev, mac);
+    //result = get_mac_address(dev, mac);
+    result = 0;
     if (result != 0)
     {
-        PRINT(VERBOSE_LEVEL_ERROR, "Unable to get MAC address for %s", dev);
-        return -1;
+      PRINT(VERBOSE_LEVEL_ERROR, "Unable to get MAC address for %s", dev);
+      return -1;
     }
-    PRINT(VERBOSE_LEVEL_INFO, "%s MAC : %02X:%02X:%02X:%02X:%02X:%02X",
-          dev, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    PRINT(VERBOSE_LEVEL_INFO, "using random MAC : %02X:%02X:%02X:%02X:%02X:%02X",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
     /* Open the device and get pcap handle for it */
     pcap_handle = pcap_open_live(dev, BUFSIZ, 0, 10, errbuf);
     if (pcap_handle == NULL)
     {
-        PRINT(VERBOSE_LEVEL_ERROR, "Couldn't open device %s: %s", dev, errbuf);
-        return -1;
+      PRINT(VERBOSE_LEVEL_ERROR, "Couldn't open device %s: %s", dev, errbuf);
+      return -1;
     }
 
     /* Send DHCP DISCOVERY packet */
     result = dhcp_discovery(mac);
     if (result)
     {
-        PRINT(VERBOSE_LEVEL_ERROR, "Couldn't send DHCP DISCOVERY on device %s: %s", dev, errbuf);
-        goto done;
+      PRINT(VERBOSE_LEVEL_ERROR, "Couldn't send DHCP DISCOVERY on device %s: %s", dev, errbuf);
+      goto done;
     }
 
     ip = 0;
@@ -435,6 +447,18 @@ main(int argc, char *argv[])
     /* Listen till the DHCP OFFER comes */
     pcap_loop(pcap_handle, -1, ether_input, NULL);
     printf("Got IP %u.%u.%u.%u\n", ip >> 24, ((ip << 8) >> 24), (ip << 16) >> 24, (ip << 24) >> 24);
+
+    char ip_string[20];
+    sprintf(ip_string,"%u.%u.%u.%u", ip >> 24, ((ip << 8) >> 24), (ip << 16) >> 24, (ip << 24) >> 24);
+    //printf("ip_string - %s\n", ip_string);
+    char mac_string[20];
+    sprintf(mac_string, "%02X:%02X:%02X:%02X:%02X:%02X",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    //printf("mac_string - %s\n", mac_string);
+    char cmd[100];
+    sprintf(cmd,"/usr/sbin/dhcping -h %s -c %s -s 192.168.7.1", mac_string, ip_string);
+    printf("%s\n", cmd);
+    system(cmd);
 
 done:
     pcap_close(pcap_handle);
