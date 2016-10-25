@@ -23,6 +23,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include <ifaddrs.h>
+#ifndef __linux__
+#include <net/if_dl.h>
+#endif
 
 typedef u_int32_t ip4_t;
 
@@ -96,7 +99,7 @@ do{                                                                     \
 
 #define DHCP_MAGIC_COOKIE   0x63825363
 
-verbose_level_t program_verbose_level = VERBOSE_LEVEL_INFO;
+verbose_level_t program_verbose_level = VERBOSE_LEVEL_DEBUG;
 pcap_t *pcap_handle;
 u_int32_t ip;
 
@@ -456,7 +459,7 @@ main(int argc, char *argv[])
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     //printf("mac_string - %s\n", mac_string);
     char cmd[100];
-    sprintf(cmd,"/usr/sbin/dhcping -h %s -c %s -s 192.168.7.1", mac_string, ip_string);
+    sprintf(cmd,"dhcping -h %s -c %s -s 192.168.7.1", mac_string, ip_string);
     printf("%s\n", cmd);
     system(cmd);
 
