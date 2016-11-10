@@ -1,0 +1,17 @@
+#!/bin/bash 
+
+source ../config.sh
+
+
+ping_addr="8.8.8.8"
+client_count=1
+
+
+for i in `seq 0 $(($client_count - 1))`; do
+  #$PWD/helper/create-interface grigg$i $(($i+10))
+  #launch downloads in sub-processes
+  run_in_background "$PWD/helper/tcp-traffic grigg$i 10" 
+done
+
+wait_for_threads
+

@@ -1,0 +1,24 @@
+#!/bin/bash 
+
+source $(dirname $0)/../../config.sh
+
+IF=$1
+count=$2
+
+if [ -z $IF ]
+  then
+  echo "Usage: $0 <interface eg eth0> <number of times download/upload needs to be repeated>"
+  exit 1
+fi
+
+if [ -z $count ] 
+  then
+  count=1
+fi
+
+for i in `seq 1 $count`;
+do
+  echo "sleeping for now"
+  sleep 10
+  echo "done"
+done
