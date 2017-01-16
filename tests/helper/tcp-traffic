@@ -3,22 +3,34 @@
 source $(dirname $0)/../../config.sh
 
 IF=$1
-count=$2
+download_count=$2
 
 if [ -z $IF ]
   then
-  echo "Usage: $0 <interface eg eth0> <number of times download/upload needs to be repeated>"
+  echo "Usage: $0 <interface> <number of times download/upload needs to be repeated>"
   exit 1
 fi
 
-if [ -z $count ] 
+if [ -z $download_count ] 
   then
-  count=1
+  download_count=1
 fi
 
-for i in `seq 1 $count`;
+for i in `seq 1 $download_count`;
 do
-  echo "sleeping for now"
-  sleep 10
-  echo "done"
+  #echo "sleeping for now"
+  #sleep 10
+  #echo "done"
+  ip=`get_interface_ip $IF`
+  start_time=`date +%s`
+  data_size=50
+  echo "starting download $data_size MB on interface $IF"
+  file=`echo $data_size`MB.zip
+  execute_cmd "wget --bind-address $ip http://ipv4.download.thinkbroadband.com/$file -O /dev/null"
+  if [ $? == 0 ]
+  then
+    echo "successfully downloaded $data_size MB in $(date +%s - $start_time)sec "
+  else
+    echo "failed to download"
+  fi
 done

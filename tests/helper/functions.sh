@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $(dirname $0)/../../config.sh
+source $(dirname $0)/../config.sh
 
 pids=()
 interfaces=()
@@ -41,6 +41,9 @@ function run_in_background() {
   pids+=$!
 }
 
+function get_interface_ip() {
+ /sbin/ifconfig $1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'
+}
 
 function create_interface() {
   NEW_IF=$1
@@ -72,14 +75,12 @@ function create_interface() {
     echo "..added $count $NEW_IF in /etc/iproute2/rt_tables"
   fi 
 
-  is_ip=`/sbin/ifconfig $NEW_IF | grep 'inet addr:'`
+  IP=`get_interface_ip $NEW_IF`
 
-  if [ $? == 0 ] 
-    then #ip present
-      IP=`echo $is_ip | cut -d: -f2 | awk '{ print $1}'`
-    else
+  if [ -z $IP ]
+  then
       dhclient $NEW_IF
-      IP=`/sbin/ifconfig $NEW_IF | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`
+      IP=`get_interface_ip $NEW_IF`
       echo "...assigned $IP to $NEW_IF"
   fi
 
@@ -102,6 +103,18 @@ function create_interface() {
     #ip rule show
     echo "...added rule"
   fi
+
+  #do ping test to ensure the interface is up
+  echo "testing ping ..."
+  ping -c 3 -W 3 -I $NEW_IF $GW
+  
+  if [ $? == 0 ] 
+  then
+    echo "ping test successful"
+  else
+    echo "ping test failed"
+  fi
+
 }
 
 function delete_interface() {
@@ -146,4 +159,11 @@ function delete_interface() {
   ip route flush table $NEW_IF
 }
 
-
+function execute_cmd() {
+  if [ $DEBUG == 0 ]
+  then
+    $1 > /dev/null
+  else
+    $1
+  fi
+}
