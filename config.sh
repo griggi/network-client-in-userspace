@@ -1,7 +1,8 @@
 #!/bin/bash
 
-SUBNET="192.168.1.0/24"
-GW=192.168.1.1
-MAIN_IF="enp2s0"
+SUBNET="192.168.7.0/24"
+GW=192.168.7.1
+#MAIN_IF="enp2s0"
+MAIN_IF="eth0"
 PING_ADDR="8.8.8.8"
 DEBUG=0
