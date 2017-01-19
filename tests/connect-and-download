@@ -6,13 +6,13 @@ source $(dirname $0)/helper/functions.sh
 	
 
 ping_addr="8.8.8.8"
-client_count=1
+client_count=12
 
 
 for i in `seq 0 $(($client_count - 1))`; do
   interface="grigg$i"
   create_interface $interface $(($i+10))
-  run_in_background "$(dirname $0)/helper/tcp-traffic $interface 1" 
+  run_in_background "$(dirname $0)/helper/tcp-traffic $interface 1 $i" 
 done
 
 wait_for_threads
