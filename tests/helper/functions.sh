@@ -1,6 +1,8 @@
 #!/bin/bash
 
-source $(dirname $0)/../config.sh
+#source $(dirname $0)/config.sh
+#TODO: above include kept giving file doesnt exist error. fix it later.
+source ~/network-client-in-userspace/config.sh
 
 pids=()
 interfaces=()
