@@ -19,19 +19,21 @@ fi
 
 for i in `seq 1 $download_count`;
 do
-  #echo "sleeping for now"
-  #sleep 10
-  #echo "done"
   ip=`get_interface_ip $IF`
   start_time=`date +%s`
   data_size=50
   echo "starting download $data_size MB on interface $IF"
   file=`echo $data_size`MB.zip
+  speed_file=$(dirname $0)"/global_speed"
   #execute_cmd "wget --bind-address $ip http://ipv4.download.thinkbroadband.com/$file -O /dev/null"
-  execute_cmd "wget --bind-address $ip http://192.168.40.87/downloads/chaos_calmer/15.05/1GB.zip -O file$3"
+  #execute_cmd "wget --bind-address $ip http://192.168.40.87/downloads/chaos_calmer/15.05/1GB.zip -O file$3"
+  speed=execute_cmd "$(wget -O testfile http://ipv4.download.thinkbroadband.com/50MB.zip 2>&1 | grep --only-matching '\([0-9.]\+ [KM]B/s\)')"
   current_time=`date +%s`
   if [ $? == 0 ]
   then
+    lock $speed_file
+    echo $speed > $speed_file
+    unlock $speed_file
     echo "successfully downloaded $data_size MB in `expr $current_time - $start_time` sec "
   else
     echo "failed to download"
