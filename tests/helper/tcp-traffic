@@ -27,8 +27,8 @@ do
   data_size=50
   echo "starting download $data_size MB on interface $IF"
   file=`echo $data_size`MB.zip
-  execute_cmd "wget --bind-address $ip http://ipv4.download.thinkbroadband.com/$file -O /dev/null"
-  #execute_cmd "wget http://192.168.10.120/downloads/chaos_calmer/15.05/50MB.zip -O /dev/null"
+  #execute_cmd "wget --bind-address $ip http://ipv4.download.thinkbroadband.com/$file -O /dev/null"
+  execute_cmd "wget --bind-address $ip http://192.168.40.87/downloads/chaos_calmer/15.05/1GB.zip -O file$3"
   current_time=`date +%s`
   if [ $? == 0 ]
   then
