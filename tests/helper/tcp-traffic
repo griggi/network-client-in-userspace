@@ -2,7 +2,6 @@
 
 source $(dirname $0)/../../config.sh
 source $(dirname $0)/functions.sh
-lock_file=$(dirname $0)"/speed_file.lock"
 
 IF=$1
 download_count=$2
@@ -25,17 +24,11 @@ do
   data_size=50
   echo "starting download $data_size MB on interface $IF"
   file=`echo $data_size`MB.zip
-  speed_file=$(dirname $0)"/global_speed"
-  global_speed=execute_cmd "$(wget -O /dev/null --bind-address $ip http://ipv4.download.thinkbroadband.com/50MB.zip 2>&1 | grep --only-matching '\([0-9.]\+ [KM]B/s\)')"
-  #global_speed=execute_cmd "$(wget -O /dev/null --bind-address $ip http://192.168.40.87/downloads/chaos_calmer/15.05/1GB.zip 2>&1 | grep --only-matching '\([0-9.]\+ [KM]B/s\)')"
+  execute_cmd "wget --bind-address $ip http://ipv4.download.thinkbroadband.com/$file -O /dev/null"
+  #execute_cmd "wget http://192.168.10.120/downloads/chaos_calmer/15.05/50MB.zip -O /dev/null"
   current_time=`date +%s`
   if [ $? == 0 ]
   then
-    if ! lock $lock_file #check for return !=1
-    then
-      echo $global_speed > $speed_file
-    fi
-    unlock $lock_file
     echo "successfully downloaded $data_size MB in `expr $current_time - $start_time` sec "
   else
     echo "failed to download"
